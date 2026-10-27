@@ -3,43 +3,848 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Creative Agent</title>
+  <title>AI Creative Agent Team — One idea, five deliverables.</title>
+  
+  <!-- Fonts & Design System Assets -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap">
+
+  <style>
+    :root {
+      --bg: #F7F7FB;
+      --text: #14142B;
+      --sub: #6B6B80;
+      --line: rgba(20,20,43,.08);
+      --font-sans: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --spring: cubic-bezier(.2,1.3,.3,1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      word-break: keep-all;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 노이즈 질감 오버레이 */
+    body::before {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: .04;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* 브랜드 그라데이션 및 블롭 */
+    .brand-gradient-text {
+      background: linear-gradient(120deg, #4F6BFF, #8B5CF6 40%, #EC4899 70%, #FF7A45);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .mesh {
+      background: radial-gradient(circle at 16% 18%, #8EA2FF 0 14%, transparent 32%), 
+                  radial-gradient(circle at 78% 9%, #FFB3D9 0 13%, transparent 30%), 
+                  radial-gradient(circle at 66% 62%, #FFD3A8 0 16%, transparent 34%), 
+                  radial-gradient(circle at 25% 74%, #9BE3FF 0 15%, transparent 32%), 
+                  radial-gradient(circle at 50% 32%, #C4A5FF 0 16%, transparent 36%), 
+                  linear-gradient(135deg, #fff, #F5F0FF 40%, #FFF7F0);
+    }
+
+    /* 유리모피즘 기본 스타일 */
+    .glass-card {
+      background: rgba(255,255,255,.55);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: 0 30px 80px -30px rgba(76,70,160,.25), inset 0 1px 1px #fff;
+      border-radius: 28px;
+    }
+
+    /* 스크롤 등장 애니메이션 */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(4px);
+      transition: opacity .8s var(--spring), transform .8s var(--spring), filter .8s var(--spring);
+    }
+    [data-reveal].revealed {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /* 1. 네비게이션 */
+    .nav-container {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      width: min(1080px, calc(100% - 24px)); height: 56px; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: 0 10px 30px -10px rgba(76,70,160,.15);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: var(--text); text-decoration: none; white-space: nowrap; }
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(120deg, #6E8BFF, #FF8AC8); }
+    .nav-links { display: flex; gap: 28px; font-size: 14px; color: var(--sub); font-weight: 500; }
+    .nav-links a { text-decoration: none; color: inherit; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: #14142B; color: #fff; padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap;
+      transition: transform .2s, opacity .2s;
+    }
+    .nav-cta:hover { transform: scale(1.02); opacity: .9; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+
+    /* 섹션 공통 마진 */
+    section { scroll-margin-top: 96px; }
+
+    /* 2. 히어로 */
+    .hero-panel {
+      margin: 100px 12px 24px 12px;
+      border-radius: 36px; padding: 48px 36px 56px 36px;
+      position: relative; overflow: hidden;
+    }
+    .hero-content {
+      max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px;
+      background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.9); font-size: 13px; font-weight: 500; white-space: nowrap;
+    }
+    .hero-badge i, .italic-tag { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 22px; color: #5B4BC4; margin-left: 4px; }
+    .hero-title {
+      font-size: clamp(40px, 6vw, 88px); font-weight: 800; line-height: 1.1; letter-spacing: -0.04em; text-wrap: balance;
+    }
+    .hero-sub { font-size: clamp(16px, 1.8vw, 20px); color: var(--sub); max-width: 640px; line-height: 1.5; }
+    
+    .logo-strip {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;
+      font-size: 13px; font-weight: 600; color: rgba(20,20,43,.4); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+    }
+
+    /* 대화창 (히어로 안의 실제 채팅) */
+    .chat-card {
+      width: min(860px, 100%); margin: 24px auto 0 auto;
+      display: flex; flex-direction: column; text-align: left;
+      transition: height .5s var(--spring);
+    }
+    .chat-header {
+      display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;
+      border-bottom: 1px solid rgba(20,20,43,.06); font-size: 13px; font-weight: 600;
+    }
+    .chat-header-left { display: flex; align-items: center; gap: 10px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #9CA3AF; transition: background .3s; }
+    body.is-connected .status-dot { background: #10B981; box-shadow: 0 0 10px rgba(16,185,129,.5); }
+    .new-chat-btn {
+      padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.9);
+      font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; transition: background .2s;
+    }
+    .new-chat-btn:hover { background: #fff; }
+
+    #webchat {
+      height: 200px; min-height: 0; width: 100%; overflow-y: auto; padding: 16px 20px;
+    }
+    body.is-started .chat-card { height: calc(100svh - 112px); }
+    body.is-started .chat-card > #webchat { flex: 1 1 0; height: auto; min-height: 0; }
+
+    .chat-foot { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(20,20,43,.06); }
+    
+    /* 예시 칩 */
+    .example-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+    .example-chips::-webkit-scrollbar { display: none; }
+    .chip-item {
+      flex: none; padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,.8); border: 1px solid rgba(20,20,43,.08);
+      font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; white-space: nowrap; transition: all .2s;
+    }
+    .chip-item:hover { background: #14142B; color: #fff; border-color: #14142B; }
+
+    /* 작업 중 표시 영역 */
+    .working-indicator {
+      display: none; align-items: center; justify-content: space-between; font-size: 12px; color: var(--sub); padding: 0 4px;
+    }
+    body.is-working .working-indicator { display: flex; }
+    .working-dots { display: flex; gap: 4px; }
+    .working-dots span { width: 6px; height: 6px; border-radius: 50%; background: #6E8BFF; animation: bounce 1.2s infinite ease-in-out both; }
+    .working-dots span:nth-child(2) { animation-delay: .2s; }
+    .working-dots span:nth-child(3) { animation-delay: .4s; }
+    .working-dots span:nth-child(4) { animation-delay: .6s; }
+    .working-dots span:nth-child(5) { animation-delay: .8s; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+
+    /* 입력창 .composer */
+    .composer {
+      position: relative; display: flex; align-items: center; background: rgba(255,255,255,.8);
+      border-radius: 28px; border: 1px solid rgba(20,20,43,.1); padding: 8px 8px 8px 20px;
+      transition: all .3s var(--spring);
+    }
+    .composer:focus-within { background: #fff; border-color: rgba(110,139,255,.5); box-shadow: 0 10px 30px -10px rgba(110,139,255,.3); transform: translateY(-2px); }
+    .composer textarea {
+      flex: 1; border: none; outline: none; background: transparent; font-family: var(--font-sans);
+      font-size: 15px; color: var(--text); resize: none; max-height: 120px; line-height: 1.5; padding: 6px 0;
+    }
+    .composer textarea::placeholder { color: #9CA3AF; }
+    .send-btn {
+      width: 44px; height: 44px; border-radius: 50%; background: #14142B; color: #fff; border: none;
+      display: grid; place-items: center; cursor: pointer; transition: opacity .2s, transform .2s; flex: none;
+    }
+    .send-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .send-btn:not(:disabled):hover { transform: scale(1.05); }
+
+    .chat-notice { font-size: 11px; color: #9CA3AF; text-align: center; }
+
+    /* 3. 숫자 띠 섹션 */
+    .stats-section {
+      max-width: 1200px; margin: 60px auto; padding: 0 24px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center;
+    }
+    .stat-card { padding: 36px 20px; border-radius: 24px; background: rgba(255,255,255,.4); border: 1px solid rgba(20,20,43,.06); }
+    .stat-number { font-size: clamp(36px, 4vw, 56px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+    .stat-label { font-size: 14px; font-weight: 600; color: var(--sub); }
+
+    @media (max-width: 768px) { .stats-section { grid-template-columns: repeat(2, 1fr); } }
+
+    /* 4. 기능 소개 (#features) */
+    .section-container { max-width: 1200px; margin: 120px auto; padding: 0 24px; }
+    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-title { font-size: clamp(32px, 4.2vw, 56px); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-top: 8px; text-wrap: balance; }
+
+    .bento-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 24px; }
+    .bento-card {
+      grid-column: span 2; border-radius: 32px; padding: 36px; background: rgba(255,255,255,.6);
+      border: 1px solid rgba(255,255,255,.8); box-shadow: 0 20px 50px -20px rgba(76,70,160,.12);
+      display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;
+      transition: transform .3s var(--spring), box-shadow .3s var(--spring);
+    }
+    .bento-card:hover { transform: translateY(-6px); box-shadow: 0 30px 60px -20px rgba(76,70,160,.2); }
+    .bento-card.span-3 { grid-column: span 3; }
+    .bento-card.span-2 { grid-column: span 2; }
+
+    .bento-mockup {
+      height: 180px; margin-bottom: 24px; border-radius: 20px; background: rgba(247,247,251,.8);
+      border: 1px solid rgba(20,20,43,.06); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+    }
+    .bento-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .bento-card p { font-size: 14px; color: var(--sub); line-height: 1.5; margin-bottom: 16px; }
+    .file-tag { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 600; color: #5B4BC4; background: rgba(110,139,255,.1); padding: 4px 10px; border-radius: 999px; width: fit-content; }
+
+    /* 목업 내부 순수 CSS 일러스트 */
+    .mockup-slides { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
+    .mockup-slide-item { position: absolute; width: 100px; height: 130px; background: #fff; border-radius: 10px; border: 1px solid rgba(20,20,43,.1); box-shadow: 0 10px 20px rgba(0,0,0,.05); transition: transform .3s; }
+    .bento-card:hover .mockup-slide-item:nth-child(1) { transform: translate(-40px, -10px) rotate(-10deg); }
+    .bento-card:hover .mockup-slide-item:nth-child(2) { transform: translate(0, 0) rotate(0deg); }
+    .bento-card:hover .mockup-slide-item:nth-child(3) { transform: translate(40px, 10px) rotate(10deg); }
+
+    .mockup-poster { width: 90px; height: 130px; background: linear-gradient(135deg, #FF8AC8, #6E8BFF); border-radius: 12px; display: flex; flex-direction: column; padding: 12px; justify-content: flex-end; color: #fff; font-weight: 800; font-size: 14px; box-shadow: 0 15px 30px rgba(236,72,153,.3); }
+    .mockup-docx { width: 110px; height: 140px; background: #fff; border-radius: 10px; padding: 14px; border-top: 6px solid #4F6BFF; box-shadow: 0 10px 20px rgba(0,0,0,.05); }
+    .mockup-web { width: 180px; height: 110px; background: #fff; border-radius: 10px; border: 1px solid rgba(20,20,43,.1); overflow: hidden; box-shadow: 0 15px 30px rgba(0,0,0,.08); }
+    .mockup-web-bar { height: 16px; background: #F1F1F5; display: flex; align-items: center; gap: 4px; padding: 0 8px; }
+    .mockup-web-dot { width: 6px; height: 6px; border-radius: 50%; background: #D1D5DB; }
+    .mockup-excel { width: 180px; height: 110px; background: #fff; border-radius: 10px; border: 1px solid rgba(20,20,43,.1); padding: 12px; box-shadow: 0 15px 30px rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 8px; }
+    .excel-bar { height: 8px; background: #10B981; border-radius: 4px; width: 0; transition: width 1.5s var(--spring); }
+    .bento-card:hover .excel-bar.b1 { width: 85%; }
+    .bento-card:hover .excel-bar.b2 { width: 65%; }
+    .bento-card:hover .excel-bar.b3 { width: 90%; }
+
+    @media (max-width: 900px) {
+      .bento-grid { grid-template-columns: 1fr; }
+      .bento-card, .bento-card.span-3, .bento-card.span-2 { grid-column: span 1; }
+    }
+
+    /* 5. 작동 방식 (#how) */
+    .how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .orbit-container-box { background: rgba(255,255,255,.5); border-radius: 32px; border: 1px solid rgba(255,255,255,.8); overflow: hidden; padding: 24px; display: flex; justify-content: center; }
+    
+    /* 제공된 오티비 스타일 그대로 적용 */
+    .orbit { --r: 150px; position: relative; width: calc(var(--r) * 2); aspect-ratio: 1; margin: 48px auto; }
+    .orbit-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed rgba(20,20,43,.16); animation: orbit-spin 40s linear infinite; }
+    .orbit .agent { position: absolute; left: 50%; top: 50%; transform: rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a))); }
+    .orbit .agent b { position: absolute; translate: -50% -50%; white-space: nowrap; padding: 8px 12px; border-radius: 999px; font: 600 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: #5B4BC4; background: rgba(255,255,255,.8); border: 1px solid #fff; animation: orbit-spin 40s linear infinite reverse; box-shadow: 0 4px 12px rgba(91,75,196,.15); }
+    .orbit .leader { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 112px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: linear-gradient(135deg, #14142B, #3B3B6D); color: #fff; box-shadow: 0 15px 30px rgba(20,20,43,.3); }
+    @keyframes orbit-spin { to { rotate: 360deg; } }
+    @media (max-width: 600px) { .orbit { --r: 100px; } .orbit .agent b { font-size: 10px; padding: 6px 9px; } .orbit .leader { width: 84px; } }
+
+    .steps-list { display: flex; flex-direction: column; gap: 24px; }
+    .step-item { display: flex; gap: 20px; align-items: flex-start; }
+    .step-num { width: 36px; height: 36px; border-radius: 50%; background: #14142B; color: #fff; font-weight: 700; display: grid; place-items: center; flex: none; font-size: 14px; }
+    .step-text h4 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .step-text p { font-size: 14px; color: var(--sub); line-height: 1.5; }
+
+    @media (max-width: 900px) { .how-grid { grid-template-columns: 1fr; } }
+
+    /* 6. 디자인 언어 섹션 */
+    .design-banner {
+      width: 100%; background: linear-gradient(120deg, #5B3DF5, #FF4FA3, #FF9F45); color: #fff;
+      padding: 100px 24px; text-align: center; position: relative; overflow: hidden; margin: 120px 0;
+    }
+    .design-banner .section-title { color: #fff; }
+    .design-banner .italic-tag { color: rgba(255,255,255,.8); }
+    .design-sub { font-size: 18px; opacity: .9; max-width: 600px; margin: 16px auto 60px auto; }
+
+    .theme-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; max-width: 1200px; margin: 0 auto; }
+    .theme-card {
+      background: rgba(255,255,255,.15); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.3); border-radius: 20px; padding: 24px 16px; text-align: left;
+    }
+    .theme-colors { display: flex; gap: 6px; margin-bottom: 16px; }
+    .theme-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(255,255,255,.5); }
+    .theme-card h5 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .theme-card p { font-size: 12px; opacity: .8; line-height: 1.4; }
+
+    @media (max-width: 1024px) { .theme-cards { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 600px) { .theme-cards { grid-template-columns: 1fr; } }
+
+    /* 7. 마키 칩 섹션 */
+    .marquee-section { overflow: hidden; padding: 40px 0; background: rgba(255,255,255,.3); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .marquee-track { display: flex; gap: 16px; width: max-content; animation: marquee 30s linear infinite; }
+    .marquee-track.reverse { animation-direction: reverse; margin-top: 12px; }
+    .marquee-chip {
+      padding: 12px 24px; border-radius: 999px; background: rgba(255,255,255,.8); border: 1px solid rgba(20,20,43,.08);
+      font-size: 15px; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.03);
+      transition: background .2s, color .2s;
+    }
+    .marquee-chip:hover { background: #14142B; color: #fff; }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    /* 8. 마지막 CTA 패널 */
+    .cta-panel {
+      margin: 120px 12px; border-radius: 36px; padding: 80px 24px; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-content { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+    .cta-button {
+      background: #14142B; color: #fff; padding: 18px 36px; border-radius: 999px; font-size: 16px; font-weight: 700;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: transform .2s, opacity .2s;
+    }
+    .cta-button:hover { transform: scale(1.03); opacity: .95; }
+
+    /* 9. 푸터 */
+    footer { text-align: center; padding: 40px 20px 80px 20px; font-size: 13px; color: var(--sub); }
+
+    /* 10. 떠 있는 알림 (Floating Toast) */
+    .floating-toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 1001;
+      background: rgba(255,255,255,.85); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.9); box-shadow: 0 15px 35px rgba(76,70,160,.2);
+      padding: 12px 20px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; gap: 10px; cursor: pointer; transition: transform .3s var(--spring), opacity .3s;
+      opacity: 0; transform: translateY(20px); pointer-events: none;
+    }
+    .floating-toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: #4F6BFF; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79,107,255, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(79,107,255, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79,107,255, 0); } }
+
+    /* Web Chat 세부 오버라이드 및 첨부파일 카드 스타일 */
+    #webchat .webchat__typing-indicator { display: none !important; }
+    #webchat .webchat__stacked-layout:not(.webchat__stacked-layout--from-user) .webchat__stacked-layout__status { display: none; }
+    #webchat .webchat__stacked-layout__attachment-row { margin-top: 8px !important; }
+    #webchat .webchat__stacked-layout__attachment, #webchat .webchat__stacked-layout__attachment .webchat__bubble__content { background: none !important; border: 0 !important; overflow: visible !important; }
+    #webchat .webchat__stacked-layout__content:has(.webchat__fileContent) { overflow: visible !important; }
+    #webchat .webchat__fileContent { padding: 0 !important; }
+    #webchat .webchat__fileContent__buttonLink { display: flex !important; align-items: center; gap: 12px; height: 56px; padding: 0 18px 0 12px; border-radius: 18px; text-decoration: none; color: #14142B; background: rgba(255,255,255,.72); -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%); border: 1px solid rgba(255,255,255,.8); box-shadow: 0 10px 24px -16px rgba(76,70,160,.3), inset 0 1px 1px #fff; }
+    #webchat .webchat__fileContent__buttonLink::before { content: "FILE"; flex: none; padding: 5px 8px; border-radius: 999px; background: linear-gradient(120deg, #EEF0FF, #FBEFFF); color: #5B4BC4; font: 600 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
+    #webchat a[download$=".pptx" i]::before { content: "PPTX"; } #webchat a[download$=".docx" i]::before { content: "DOCX"; } #webchat a[download$=".xlsx" i]::before { content: "XLSX"; } #webchat a[download$=".html" i]::before { content: "HTML"; }
+    #webchat .webchat__fileContent__badge { flex: 1; min-width: 0; background: none !important; padding: 0 !important; }
+    #webchat .webchat__fileContent__fileName { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace !important; color: #14142B !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #webchat .webchat__fileContent__downloadIcon { flex: none; box-sizing: content-box; width: 16px; height: 16px; padding: 0; fill: #6B6B80; color: #6B6B80; }
+    
+    #webchat .webchat__render-markdown { word-break: keep-all; overflow-wrap: anywhere; line-height: 1.7; }
+    #webchat .webchat__render-markdown table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; border-spacing: 0; margin: 12px 0; font-variant-numeric: tabular-nums; }
+    #webchat .webchat__render-markdown th, #webchat .webchat__render-markdown td { padding: 9px 18px 9px 0; border-bottom: 1px solid rgba(20,20,43,.08); white-space: nowrap; }
+    #webchat .webchat__render-markdown th { font-size: 12px; font-weight: 600; color: #6B6B80; }
+
+    /* 작업 중 오로라 테두리 */
+    @property --aurora { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+    .composer::before { content: ""; position: absolute; inset: -1px; padding: 1.5px; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .6s; background: conic-gradient(from var(--aurora), #a5b4fc, #f0abfc, #fda4af, #fcd34d, #86efac, #67e8f9, #a5b4fc); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: aurora 6s linear infinite; }
+    body.is-working .composer::before { opacity: .8; }
+    @keyframes aurora { to { --aurora: 360deg; } }
+  </style>
 </head>
 <body>
-  <p id="status" role="status" aria-live="polite">채팅에 연결하는 중입니다...</p>
-  <div id="webchat" style="height: 600px"></div>
+
+  <!-- 1. 네비게이션 -->
+  <nav class="nav-container">
+    <a href="#" class="nav-brand">
+      <div class="nav-dot"></div>
+      AI Creative Agent Team
+    </a>
+    <div class="nav-links">
+      <a href="#features">기능</a>
+      <a href="#how">작동 방식</a>
+      <a href="#design">디자인</a>
+    </div>
+    <a href="#hero-chat" class="nav-cta" onclick="scrollToChat(event)">지금 써 보기</a>
+  </nav>
+
+  <!-- 2. 히어로 섹션 -->
+  <header class="hero-panel mesh" id="hero-chat">
+    <div class="hero-content">
+      <div class="hero-badge">
+        ● Copilot Studio 멀티 에이전트
+        <i>One idea, five deliverables.</i>
+      </div>
+      <h1 class="hero-title">
+        한 줄의 아이디어, <span class="brand-gradient-text">다섯 개의 결과물</span>.
+      </h1>
+      <p class="hero-sub">
+        팀장 에이전트가 전문가 다섯에게 일을 나눠, 발표자료부터 예산 분석까지 한 번에 만들어 드려요.
+      </p>
+
+      <!-- 대화창 카드 -->
+      <div class="glass-card chat-card">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <div class="status-dot" id="statusDot"></div>
+            <span>AI Creative Agent Team</span>
+          </div>
+          <button class="new-chat-btn" onclick="location.reload()">새 대화</button>
+        </div>
+
+        <div id="webchat"></div>
+
+        <div class="chat-foot">
+          <div class="example-chips" id="exampleChips">
+            <button class="chip-item" onclick="sendExample('가을 학교 축제 기획해 줘')">가을 학교 축제 기획해 줘</button>
+            <button class="chip-item" onclick="sendExample('탄소중립 캠페인 홍보물 만들어 줘')">탄소중립 캠페인 홍보물 만들어 줘</button>
+            <button class="chip-item" onclick="sendExample('교사 AI 연수 프로그램 제안해 줘')">교사 AI 연수 프로그램 제안해 줘</button>
+          </div>
+
+          <div class="working-indicator" id="workingIndicator">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="working-dots"><span></span><span></span><span></span><span></span><span></span></div>
+              <span id="workingText">팀이 작업 중 · 0:00</span>
+            </div>
+            <span style="font-size:11px;">파일 5개를 만드느라 몇 분 걸릴 수 있어요</span>
+          </div>
+
+          <div class="composer" id="composerBox">
+            <textarea id="userInput" rows="1" placeholder="무엇을 만들어 볼까요?" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="sendBtn" onclick="submitMessage()" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </button>
+          </div>
+          <div class="chat-notice">AI는 실수할 수 있어요. 중요한 내용은 확인하세요.</div>
+        </div>
+      </div>
+
+      <div class="logo-strip">
+        Microsoft Copilot Studio · Claude Opus 5.5 · PowerPoint · Word · Excel · HTML
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. 숫자 띠 -->
+  <section class="stats-section">
+    <div class="stat-card" data-reveal>
+      <div class="stat-number brand-gradient-text" data-target="1">0</div>
+      <div class="stat-label">번의 요청</div>
+    </div>
+    <div class="stat-card" data-reveal>
+      <div class="stat-number brand-gradient-text" data-target="6">0</div>
+      <div class="stat-label">명의 에이전트</div>
+    </div>
+    <div class="stat-card" data-reveal>
+      <div class="stat-number brand-gradient-text" data-target="7">0</div>
+      <div class="stat-label">개의 작업 매뉴얼</div>
+    </div>
+    <div class="stat-card" data-reveal>
+      <div class="stat-number brand-gradient-text" data-target="5">0</div>
+      <div class="stat-label">개의 파일</div>
+    </div>
+  </section>
+
+  <!-- 4. 기능 소개 (#features) -->
+  <section class="section-container" id="features">
+    <div class="section-header" data-reveal>
+      <span class="italic-tag">Five deliverables.</span>
+      <h2 class="section-title">한 번의 요청으로 받는 다섯 가지</h2>
+    </div>
+
+    <div class="bento-grid">
+      <!-- 1. PPTX -->
+      <div class="bento-card span-3" data-reveal>
+        <div class="bento-mockup">
+          <div class="mockup-slides">
+            <div class="mockup-slide-item"></div>
+            <div class="mockup-slide-item"></div>
+            <div class="mockup-slide-item"></div>
+          </div>
+        </div>
+        <div>
+          <h3>말할 거리가 정리된 발표 슬라이드</h3>
+          <p>10장 내외의 깔끔한 슬라이드와 발표자 노트까지 완벽하게 구성합니다.</p>
+          <div class="file-tag">presentation.pptx</div>
+        </div>
+      </div>
+
+      <!-- 2. Poster HTML -->
+      <div class="bento-card span-3" data-reveal>
+        <div class="bento-mockup">
+          <div class="mockup-poster">POSTER</div>
+        </div>
+        <div>
+          <h3>걸어 두고 싶은 홍보 포스터</h3>
+          <p>브라우저에서 바로 여는 유리 질감 포스터, 인쇄 및 PDF 저장도 지원합니다.</p>
+          <div class="file-tag">poster.html</div>
+        </div>
+      </div>
+
+      <!-- 3. DOCX -->
+      <div class="bento-card span-2" data-reveal>
+        <div class="bento-mockup">
+          <div class="mockup-docx"></div>
+        </div>
+        <div>
+          <h3>바로 보낼 수 있는 제안서</h3>
+          <p>테마 색 표지와 가독성 높은 흰 본문 레이아웃 문서.</p>
+          <div class="file-tag">proposal.docx</div>
+        </div>
+      </div>
+
+      <!-- 4. Webpage HTML -->
+      <div class="bento-card span-2" data-reveal>
+        <div class="bento-mockup">
+          <div class="mockup-web">
+            <div class="mockup-web-bar"><div class="mockup-web-dot"></div><div class="mockup-web-dot"></div><div class="mockup-web-dot"></div></div>
+          </div>
+        </div>
+        <div>
+          <h3>신청까지 받는 랜딩 페이지</h3>
+          <p>유리 메뉴 바와 카드로 만든 소개 및 신청 전용 웹페이지.</p>
+          <div class="file-tag">webpage.html</div>
+        </div>
+      </div>
+
+      <!-- 5. Budget XLSX -->
+      <div class="bento-card span-2" data-reveal>
+        <div class="bento-mockup">
+          <div class="mockup-excel">
+            <div style="font-size:12px; font-weight:700;">₩12,400,000</div>
+            <div class="excel-bar b1"></div>
+            <div class="excel-bar b2"></div>
+            <div class="excel-bar b3"></div>
+          </div>
+        </div>
+        <div>
+          <h3>오차 없는 예산 분석</h3>
+          <p>수식으로 계산된 합계와 명확한 항목별 예산 분할표.</p>
+          <div class="file-tag">budget_analysis.xlsx</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 작동 방식 (#how) -->
+  <section class="section-container" id="how">
+    <div class="section-header" data-reveal>
+      <span class="italic-tag">How the team works.</span>
+      <h2 class="section-title">팀장 하나, 전문가 다섯, 매뉴얼 일곱.</h2>
+    </div>
+
+    <div class="how-grid">
+      <div class="orbit-container-box" data-reveal>
+        <div class="orbit">
+          <div class="orbit-ring">
+            <span class="agent" style="--a:0deg"><b>ppt-agent</b></span>
+            <span class="agent" style="--a:72deg"><b>poster-agent</b></span>
+            <span class="agent" style="--a:144deg"><b>proposal-agent</b></span>
+            <span class="agent" style="--a:216deg"><b>webpage-agent</b></span>
+            <span class="agent" style="--a:288deg"><b>budget-agent</b></span>
+          </div>
+          <div class="leader">팀장</div>
+        </div>
+      </div>
+
+      <div class="steps-list" data-reveal>
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h4>브리프</h4>
+            <p>요청을 분석해 한 장짜리 기획서로 정리하고 최적의 컬러 테마를 확정합니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h4>예산 먼저</h4>
+            <p>budget-agent가 예산 기준표를 바탕으로 모든 항목의 단가와 합계를 정확히 잡습니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h4>원고 분업</h4>
+            <p>다섯 전문가 에이전트가 동일한 브리프를 공유받아 각자의 분야별 원고를 작성합니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <h4>파일 5개 완성</h4>
+            <p>공통 디자인 시스템 규격에 맞춰 완성된 5개 파일을 한 번에 첨부하여 전달합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 디자인 언어 섹션 (#design) -->
+  <section class="design-banner" id="design">
+    <span class="italic-tag">One design language.</span>
+    <h2 class="section-title">다섯 파일, 하나의 리퀴드 글래스.</h2>
+    <p class="design-sub">재질과 레이아웃은 늘 동일하며, 프로젝트 성격에 맞는 감각적인 컬러 테마가 적용됩니다.</p>
+
+    <div class="theme-cards">
+      <div class="theme-card">
+        <div class="theme-colors"><div class="theme-dot" style="background:#A8D8FF"></div><div class="theme-dot" style="background:#007AFF"></div></div>
+        <h5>스카이</h5>
+        <p>교육 및 일반 행사에 적합한 신뢰감 있는 블루 톤</p>
+      </div>
+      <div class="theme-card">
+        <div class="theme-colors"><div class="theme-dot" style="background:#1EC8FF"></div><div class="theme-dot" style="background:#FF2E93"></div></div>
+        <h5>팝</h5>
+        <p>IT 캠페인과 축제에 어울리는 트렌디한 네온 그라데이션</p>
+      </div>
+      <div class="theme-card">
+        <div class="theme-colors"><div class="theme-dot" style="background:#0B1628"></div><div class="theme-dot" style="background:#6EA8FF"></div></div>
+        <h5>네이비</h5>
+        <p>공공 보고서 및 정책 발표에 어울리는 묵직한 클래식</p>
+      </div>
+      <div class="theme-card">
+        <div class="theme-colors"><div class="theme-dot" style="background:#A8E3C4"></div><div class="theme-dot" style="background:#12A150"></div></div>
+        <h5>그린</h5>
+        <p>환경 및 ESG 프로젝트를 위한 친환경 에너제틱 톤</p>
+      </div>
+      <div class="theme-card">
+        <div class="theme-colors"><div class="theme-dot" style="background:#FFC2B3"></div><div class="theme-dot" style="background:#FF6B4A"></div></div>
+        <h5>코럴</h5>
+        <p>가족 및 복지 행사에 어울리는 따뜻하고 친근한 무드</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 준비된 프롬프트 마키 섹션 -->
+  <section class="marquee-section">
+    <div style="text-align:center; margin-bottom:24px;">
+      <span class="italic-tag">Ready prompts.</span>
+      <h3 style="font-size:24px; font-weight:800; margin-top:4px;">이런 요청에 강해요</h3>
+    </div>
+    <div class="marquee-track">
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('가을 학교 축제 기획해 줘')">가을 학교 축제 기획해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('탄소중립 캠페인 홍보물 만들어 줘')">탄소중립 캠페인 홍보물 만들어 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('교사 AI 연수 프로그램 제안해 줘')">교사 AI 연수 프로그램 제안해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('신제품 런칭 행사 기획해 줘')">신제품 런칭 행사 기획해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('진로 체험 주간 프로그램 만들어 줘')">진로 체험 주간 프로그램 만들어 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('지역 축제 홍보 패키지 제안해 줘')">지역 축제 홍보 패키지 제안해 줘</button>
+      <!-- 무한 루프를 위한 복제 -->
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('가을 학교 축제 기획해 줘')">가을 학교 축제 기획해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('탄소중립 캠페인 홍보물 만들어 줘')">탄소중립 캠페인 홍보물 만들어 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('교사 AI 연수 프로그램 제안해 줘')">교사 AI 연수 프로그램 제안해 줘</button>
+    </div>
+    <div class="marquee-track reverse">
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('고객 제안 워크숍 기획해 줘')">고객 제안 워크숍 기획해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('학부모 설명회 자료 준비해 줘')">학부모 설명회 자료 준비해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('해커톤 대회 전체 패키지 만들어 줘')">해커톤 대회 전체 패키지 만들어 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('동아리 박람회 기획서 만들어 줘')">동아리 박람회 기획서 만들어 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('지역 커뮤니티 행사 기획해 줘')">지역 커뮤니티 행사 기획해 줘</button>
+      <!-- 무한 루프 복제 -->
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('고객 제안 워크숍 기획해 줘')">고객 제안 워크숍 기획해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('학부모 설명회 자료 준비해 줘')">학부모 설명회 자료 준비해 줘</button>
+      <button class="marquee-chip" onclick="sendPromptFromMarquee('해커톤 대회 전체 패키지 만들어 줘')">해커톤 대회 전체 패키지 만들어 줘</button>
+    </div>
+  </section>
+
+  <!-- 8. 마지막 CTA 패널 -->
+  <section class="cta-panel mesh">
+    <div class="cta-content" data-reveal>
+      <span class="italic-tag">Your turn.</span>
+      <h2 class="section-title">지금, 아이디어 한 줄을<br>적어 보세요.</h2>
+      <a href="#hero-chat" class="cta-button" onclick="scrollToChat(event)">
+        대화 시작하기 ↑
+      </a>
+    </div>
+  </section>
+
+  <!-- 9. 푸터 -->
+  <footer>
+    AI Creative Agent Team · Copilot Studio로 만든 멀티 에이전트 · © 2026
+  </footer>
+
+  <!-- 10. 떠 있는 알림 (Floating Toast) -->
+  <div class="floating-toast" id="floatingToast" onclick="scrollToChat(event)">
+    <div class="toast-dot" id="toastDot"></div>
+    <span id="toastText">팀이 작업 중 · 1:20</span>
+  </div>
+
+  <!-- Web Chat CDN -->
   <script src="https://cdn.botframework.com/botframework-webchat/4.18.0/webchat.js"></script>
   <script>
     const BROKER_URL = "https://dl-broker-juwon-4jt3z.azurewebsites.net/api/directlineToken";
     const SEALED = "jMs9pgfy-PeHl4BMgp75lOEQdW0AUAutY1TYTZUOiBZSAHpca5NK8bn7JQjWiocaM4O4R-_N87d3qBUOEMHFsTAbNDAqI9DpFGonnTrhLPzs2D3BC_-OHXSKjhpHdH1z4pCfUTAvydV1PzMbCgl4MCsPcZcvgOFpew4DdViUXnnUHtv4hcyDN01t8tnuvoBOjPWXw_VxshAX9WAIKslPWB2Dy8E8O-xv47DFTKsXIDY_qzPhtSKCHS1x5rM948yg0n1r_On6adHJ4o2MbzCNFrwk2HiRVcGdqU4L4shIE_QxrRyhoAIqcW2SWAdKz40JnozyEboOclLD5lpcZUBw4cXz-3IrLsJRkGXQCELT0ZBd8YPI0EtzIxVsYWxuHVZCDuB2eQ9_nUwKKr5RWbLxTwwSvo8_YaK4_F1rIMFZeqsLLRCMGAyNfUvXqspX77HWaOylTvs5iwCbgksgIc3mDfmWOKacsrs3hvHQaK94ERlyBURlVrXcH-AjI65FeySOv2NRLpcnyytP9Kv0qRcLOt7jinxZr3wQ13kJzvttpbNI5bcLiQUZEyE3JpYSQPTzjIEuYWu-TZyd9f6VyRQNtK3MsY4YSf7OXQb4IHbw8K2sR1yuUuh_sliAYMawXu4HX1HIeXAE6moBMefeL_QS";
-    const status = document.getElementById("status");
 
-    function showError(message) {
-      status.hidden = false;
-      status.textContent = message;
+    let chatStore = null;
+    let workingStartTime = null;
+    let workingTimerInterval = null;
+
+    // 공통 스크롤 함수
+    function scrollToChat(e) {
+      if (e) e.preventDefault();
+      const card = document.getElementById('hero-chat');
+      const topPos = card.getBoundingClientRect().top + window.scrollY - 88;
+      window.scrollTo({ top: topPos, behavior: 'smooth' });
+      setTimeout(() => {
+        document.getElementById('userInput').focus({ preventScroll: true });
+      }, 500);
     }
 
+    // 텍스트 영역 자동 높이 조절
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+
+    // 키보드 엔터 전송 처리
+    function handleKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.isComposing || e.keyCode === 229) return;
+        e.preventDefault();
+        submitMessage();
+      }
+    }
+
+    // 예시 칩 및 마키 칩 클릭 시 입력창에 반영 후 전송
+    function sendExample(text) {
+      const input = document.getElementById('userInput');
+      input.value = text;
+      autoResize(input);
+      submitMessage();
+    }
+    function sendPromptFromMarquee(text) {
+      scrollToChat();
+      const input = document.getElementById('userInput');
+      input.value = text;
+      autoResize(input);
+      document.getElementById('sendBtn').disabled = false;
+    }
+
+    // 메시지 전송 로직
+    function submitMessage() {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text || !chatStore) return;
+
+      // 대화창 활성화 클래스 추가
+      document.body.classList.add('is-started');
+      document.body.classList.add('is-working');
+      
+      // 작업 중 타이머 시작
+      startWorkingTimer();
+
+      // Web Chat 스토어를 통해 메시지 전송
+      chatStore.dispatch({
+        type: 'WEB_CHAT/SEND_MESSAGE',
+        payload: { text }
+      });
+
+      input.value = '';
+      input.style.height = 'auto';
+      document.getElementById('sendBtn').disabled = true;
+
+      // 대화창 영역으로 부드럽게 스크롤
+      const chatCard = document.querySelector('.chat-card');
+      window.scrollTo({
+        top: chatCard.getBoundingClientRect().top + window.scrollY - 88,
+        behavior: 'smooth'
+      });
+    }
+
+    function startWorkingTimer() {
+      workingStartTime = Date.now();
+      clearInterval(workingTimerInterval);
+      workingTimerInterval = setInterval(() => {
+        const elapsedSec = Math.floor((Date.now() - workingStartTime) / 1000);
+        const min = Math.floor(elapsedSec / 60);
+        const sec = elapsedSec % 60;
+        const timeStr = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        document.getElementById('workingText').textContent = `팀이 작업 중 · ${timeStr}`;
+        document.getElementById('toastText').textContent = `팀이 작업 중 · ${timeStr}`;
+      }, 1000);
+    }
+
+    function stopWorkingTimer(isDone = true) {
+      clearInterval(workingTimerInterval);
+      document.body.classList.remove('is-working');
+      if (isDone) {
+        document.getElementById('toastText').textContent = '결과가 도착했어요 ↑';
+        document.getElementById('toastDot').style.background = '#10B981';
+      }
+    }
+
+    // 스크롤 등장 효과 (IntersectionObserver)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          // 숫자 카운트업 실행
+          const statNum = entry.target.querySelector('.stat-number');
+          if (statNum && !statNum.classList.contains('counted')) {
+            statNum.classList.add('counted');
+            const targetVal = parseInt(statNum.getAttribute('data-target'), 10);
+            let current = 0;
+            const timer = setInterval(() => {
+              current++;
+              statNum.textContent = current;
+              if (current >= targetVal) clearInterval(timer);
+            }, 200);
+          }
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+
+    // 토스트 알림 표시 제어 (스크롤 위치에 따라)
+    window.addEventListener('scroll', () => {
+      const chatCard = document.querySelector('.chat-card');
+      const rect = chatCard.getBoundingClientRect();
+      const toast = document.getElementById('floatingToast');
+      // 대화창이 화면 밖으로 벗어났을 때만 토스트 표시
+      if (rect.bottom < 0 || rect.top > window.innerHeight) {
+        if (document.body.classList.contains('is-started')) {
+          toast.classList.add('show');
+        }
+      } else {
+        toast.classList.remove('show');
+      }
+    });
+
+    // Web Chat 연결 및 초기화
     async function connect() {
-      if (!window.WebChat ||
-          typeof WebChat.createDirectLine !== "function" ||
-          typeof WebChat.renderWebChat !== "function") {
-        showError("채팅 구성 요소를 불러오지 못했습니다. 네트워크를 확인한 뒤 새로고침해 주세요.");
+      if (!window.WebChat || typeof WebChat.createDirectLine !== "function" || typeof WebChat.renderWebChat !== "function") {
+        document.getElementById('userInput').placeholder = "채팅 요소를 불러오지 못했습니다. 새로고침해 주세요.";
         return;
       }
 
       let response;
       try {
-        // Keep this a simple CORS request; the broker may not support preflight.
         response = await fetch(BROKER_URL, {
           method: "POST",
           body: JSON.stringify({ sealed: SEALED })
         });
       } catch {
-        showError("서버에 연결하지 못했습니다. 네트워크와 배포 주소를 확인해 주세요.");
+        showConnectionError("서버에 연결하지 못했습니다. 네트워크와 배포 주소를 확인해 주세요.");
         return;
       }
       if (!response.ok) {
-        showError("서버가 연결 요청을 처리하지 못했습니다 (HTTP " + response.status + ").");
+        showConnectionError("서버가 연결 요청을 처리하지 못했습니다 (HTTP " + response.status + ").");
         return;
       }
 
@@ -47,26 +852,69 @@
       try {
         data = await response.json();
       } catch {
-        showError("서버 응답을 읽을 수 없습니다. 잠시 후 다시 시도해 주세요.");
+        showConnectionError("서버 응답을 읽을 수 없습니다. 잠시 후 다시 시도해 주세요.");
         return;
       }
       if (!data || typeof data.token !== "string" || !data.token.trim()) {
-        showError("서버에서 연결 토큰을 받지 못했습니다. 암호와 배포 주소를 확인해 주세요.");
+        showConnectionError("서버에서 연결 토큰을 받지 못했습니다.");
         return;
       }
 
       try {
         const directLine = WebChat.createDirectLine({ token: data.token });
-        status.hidden = true;
+        
+        // 미들웨어를 포함한 커스텀 store 생성
+        chatStore = WebChat.createStore({}, ({ dispatch }) => next => action => {
+          if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+            document.body.classList.add('is-connected');
+            document.getElementById('userInput').placeholder = "무엇을 만들어 볼까요?";
+            document.getElementById('sendBtn').disabled = false;
+          }
+          if (action.type === 'DIRECT_LINE/INCOMING_ACTIVITY') {
+            const activity = action.payload.activity;
+            if (activity && activity.from && activity.from.role !== 'user') {
+              if (activity.type === 'message') {
+                stopWorkingTimer(true);
+              }
+            }
+          }
+          return next(action);
+        });
+
         directLine.postActivity({
           type: "event", name: "startConversation", from: { id: "user" }
         }).subscribe({
-          error: () => showError("첫 인사를 요청하지 못했습니다. 채팅창에 메시지를 입력해 주세요.")
+          error: () => console.error("첫 인사 요청 실패")
         });
-        WebChat.renderWebChat({ directLine, locale: "ko-KR" }, document.getElementById("webchat"));
+
+        WebChat.renderWebChat({
+          directLine,
+          store: chatStore,
+          locale: "ko-KR",
+          styleOptions: {
+            hideSendBox: true,
+            rootHeight: "100%",
+            backgroundColor: "transparent",
+            primaryFont: "'Pretendard Variable', -apple-system, sans-serif",
+            bubbleBackground: "transparent",
+            bubbleBorderWidth: 0,
+            bubbleMaxWidth: 720,
+            bubbleMinWidth: 0,
+            bubbleFromUserBackground: "linear-gradient(135deg, #EEF0FF, #FBEFFF)",
+            bubbleFromUserBorderWidth: 0,
+            bubbleFromUserBorderRadius: 20
+          }
+        }, document.getElementById("webchat"));
+
       } catch {
-        showError("채팅을 시작하지 못했습니다. 새로고침 후 다시 시도해 주세요.");
+        showConnectionError("채팅을 시작하지 못했습니다. 새로고침 후 다시 시도해 주세요.");
       }
+    }
+
+    function showConnectionError(msg) {
+      document.getElementById('userInput').placeholder = "지금은 팀과 연결할 수 없어요";
+      document.getElementById('userInput').disabled = true;
+      console.error(msg);
     }
 
     connect();
